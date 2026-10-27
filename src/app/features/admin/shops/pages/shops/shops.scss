@@ -1,0 +1,41 @@
+:host { display: block; min-width: 0; }
+.shops-page { display: grid; gap: 24px; }
+.shop-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.shop-metric { display: flex; min-width: 0; min-height: 112px; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border: 1px solid var(--fl-color-border); border-radius: 12px; background: var(--fl-color-surface); box-shadow: var(--fl-shadow-card); }
+.shop-metric > div { display: grid; min-width: 0; gap: 7px; }
+.shop-metric > div > span { overflow: hidden; color: #647184; font-size: 11px; font-weight: 650; letter-spacing: .04em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.shop-metric strong { color: #172436; font-size: 24px; font-weight: 750; line-height: 1; }
+.shop-metric small { color: #97a2b0; font-size: 10px; }
+.rating-star { font-size: 18px; }
+.metric-icon { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border: 1px solid #eef0f3; border-radius: 14px; background: #f8f9fb; font-size: 20px; }
+.metric-icon.is-gold { color: #d3a51c; }.metric-icon.is-green { color: #05b886; }.metric-icon.is-blue { color: #3b82f6; }.metric-icon.is-orange { color: #f59e0b; }
+.shop-toolbar { display: flex; min-height: 72px; align-items: center; justify-content: space-between; gap: 20px; padding: 12px 16px; border: 1px solid var(--fl-color-border); border-radius: 12px; background: var(--fl-color-surface); box-shadow: var(--fl-shadow-card); }
+.shop-search { display: flex; width: min(100%, 450px); min-height: 40px; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid var(--fl-color-border); border-radius: 8px; background: #f9fafb; color: #8d99a8; }
+.shop-search:focus-within { border-color: var(--fl-color-gold); box-shadow: 0 0 0 3px rgb(212 175 55 / 14%); }
+.shop-search input { width: 100%; min-width: 0; height: 38px; border: 0; outline: 0; background: transparent; color: var(--fl-color-text); font: inherit; font-size: 13px; }
+.status-control { display: flex; align-items: center; gap: 12px; }.status-label { display: inline-flex; align-items: center; gap: 7px; color: #647184; font-size: 13px; white-space: nowrap; }
+.status-segment { display: inline-flex; gap: 2px; padding: 4px; border-radius: 8px; background: #f1f3f6; }
+.status-segment button { min-height: 30px; padding: 0 14px; border: 0; border-radius: 6px; background: transparent; color: #647184; font: inherit; font-size: 12px; cursor: pointer; }
+.status-segment button.is-selected { background: var(--fl-color-surface); color: #253448; box-shadow: 0 1px 3px rgb(17 17 17 / 12%); }
+.shops-table-wrap { overflow-x: auto; border: 1px solid var(--fl-color-border); border-radius: 12px; background: var(--fl-color-surface); box-shadow: var(--fl-shadow-card); }
+.shops-table { width: 100%; min-width: 1040px; border-collapse: collapse; text-align: left; }
+.shops-table th { height: 62px; padding: 0 18px; border-bottom: 1px solid var(--fl-color-border); color: #677486; font-size: 11px; font-weight: 750; letter-spacing: .025em; text-transform: uppercase; }
+.shops-table td { min-height: 88px; padding: 14px 18px; border-bottom: 1px solid #eff1f4; color: #39485a; font-size: 12px; vertical-align: middle; }
+.shops-table tbody tr:last-child td { border-bottom: 0; }.shops-table tbody tr:hover { background: #fcfcfd; }
+.shop-info { display: flex; min-width: 225px; align-items: center; gap: 12px; }
+.shop-thumbnail { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border: 1px solid rgb(17 17 17 / 5%); border-radius: 9px; font-size: 21px; }
+.shop-thumbnail.is-restaurant { background: linear-gradient(140deg, #f8e6d8, #ad6d43); color: #6f3823; }.shop-thumbnail.is-bakery { background: linear-gradient(140deg, #f8edda, #c99d5c); color: #704b20; }.shop-thumbnail.is-fresh { background: linear-gradient(140deg, #e1f4df, #70b887); color: #247248; }.shop-thumbnail.is-night { background: linear-gradient(140deg, #e8e4f0, #797291); color: #40374e; }
+.shop-copy { display: grid; min-width: 0; gap: 3px; }.shop-copy strong { max-width: 155px; color: #1d2b3c; font-size: 12px; font-weight: 700; line-height: 1.25; }.shop-copy small { color: #748195; font-size: 10px; }.shop-copy .shop-rating { color: #c97b13; }
+.contact-details { display: grid; min-width: 225px; gap: 6px; }.contact-details span { display: flex; align-items: flex-start; gap: 8px; line-height: 1.35; }.contact-details .bi { flex: 0 0 12px; color: #99a4b2; }
+.coordinates { display: inline-block; padding: 8px; border: 1px solid #e8edf2; border-radius: 5px; background: #fafbfc; color: #667487; font-family: "DM Mono", Consolas, monospace; font-size: 10px; line-height: 1.55; white-space: nowrap; }
+.shop-categories { display: flex; max-width: 210px; flex-wrap: wrap; gap: 5px; }.shop-categories span { padding: 5px 7px; border: 1px solid #e9edf1; border-radius: 5px; background: #f5f6f8; color: #425164; font-size: 10px; white-space: nowrap; }
+.shop-status { display: inline-flex; min-height: 26px; align-items: center; gap: 7px; padding: 3px 10px; border: 1px solid #a9f3d0; border-radius: 999px; background: #effdf6; color: #07875e; font-size: 11px; font-weight: 600; white-space: nowrap; }.shop-status i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }.shop-status.is-inactive { border-color: #fecdd3; background: #fff1f2; color: #e23b58; }
+.actions-heading, .shop-actions { min-width: 86px; text-align: center; }.icon-action { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #8190a2; cursor: pointer; }.icon-action:hover { background: #edf2f7; color: #30455f; }.icon-action.is-delete:hover { background: #fff0f1; color: #d33b4d; }
+.empty-state { height: 120px; color: var(--fl-color-muted) !important; text-align: center; }
+.shop-modal-backdrop { position: fixed; z-index: 90; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(17 17 17 / 48%); }.shop-modal { width: min(100%, 480px); padding: 22px; border: 1px solid var(--fl-color-border); border-radius: 10px; background: var(--fl-color-surface); box-shadow: 0 20px 55px rgb(17 17 17 / 22%); }
+.shop-modal header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }.shop-modal h2 { margin: 0; color: var(--fl-color-text); font-size: 18px; }.shop-modal header button { display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--fl-color-muted); cursor: pointer; }
+.shop-modal form { display: grid; gap: 14px; }.shop-modal form > label { display: grid; gap: 6px; color: #536171; font-size: 12px; font-weight: 650; }.shop-modal input, .shop-modal select { min-height: 40px; padding: 0 10px; border: 1px solid var(--fl-color-border); border-radius: 6px; background: var(--fl-color-surface); color: var(--fl-color-text); font: inherit; font-size: 13px; }
+.shop-modal footer { display: flex; justify-content: flex-end; gap: 9px; margin-top: 8px; }.shop-modal footer button { min-height: 38px; padding: 0 13px; border: 1px solid var(--fl-color-border); border-radius: 6px; background: var(--fl-color-surface); color: var(--fl-color-text); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }.shop-modal footer .save-button { border-color: var(--fl-color-gold); background: var(--fl-color-gold); color: var(--fl-color-primary); }
+.status-segment button:focus-visible, .icon-action:focus-visible, .shop-modal button:focus-visible, .shop-modal input:focus-visible, .shop-modal select:focus-visible { outline: 3px solid rgb(212 175 55 / 42%); outline-offset: 2px; }
+@media (max-width: 1120px) { .shop-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }.shop-toolbar { flex-wrap: wrap; } }
+@media (max-width: 600px) { .shops-page { gap: 16px; }.shop-metrics { gap: 10px; }.shop-metric { min-height: 96px; padding: 12px; }.shop-metric > div > span { font-size: 9px; }.shop-metric strong { font-size: 20px; }.metric-icon { width: 38px; height: 38px; flex-basis: 38px; font-size: 17px; }.shop-toolbar { align-items: stretch; gap: 12px; padding: 12px; }.shop-search { width: 100%; }.status-control { justify-content: space-between; }.status-segment button { padding: 0 10px; } }

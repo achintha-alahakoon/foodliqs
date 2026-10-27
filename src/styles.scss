@@ -1,1 +1,116 @@
-/* You can add global styles to this file, and also import other style files */
+@use './app/layouts/admin-layout/admin-layout' as admin-layout;
+
+:root {
+	--fl-color-primary: #111111;
+	--fl-color-sidebar: #171717;
+	--fl-color-secondary: #222222;
+	--fl-color-gold: #d4af37;
+	--fl-color-gold-hover: #e5c158;
+	--fl-color-gold-soft: #fbf5e5;
+	--fl-color-background: #f7f7f5;
+	--fl-color-surface: #ffffff;
+	--fl-color-text: #202020;
+	--fl-color-muted: #737373;
+	--fl-color-border: #e8e8e5;
+	--fl-color-success: #198754;
+	--fl-color-warning: #d99a16;
+	--fl-color-danger: #dc3545;
+	--fl-color-info: #2878c7;
+	--fl-radius-card: 12px;
+	--fl-shadow-card: 0 2px 8px rgb(17 17 17 / 4%);
+}
+html,
+body {
+	min-height: 100%;
+	margin: 0;
+}
+
+body {
+	min-width: 320px;
+}
+
+[data-admin-theme] .admin-card {
+	border: 1px solid var(--fl-color-border);
+	border-radius: var(--fl-radius-card);
+	background: var(--fl-color-surface);
+	box-shadow: var(--fl-shadow-card);
+}
+
+[data-admin-theme] .admin-button {
+	min-height: 40px;
+	padding: 0 15px;
+	border: 1px solid var(--fl-color-border);
+	border-radius: 7px;
+	background: var(--fl-color-surface);
+	color: var(--fl-color-text);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+[data-admin-theme] .admin-button:focus-visible,
+[data-admin-theme] .admin-input:focus-visible {
+	outline: 3px solid rgb(212 175 55 / 35%);
+	outline-offset: 2px;
+}
+
+[data-admin-theme] .admin-button--primary {
+	border-color: var(--fl-color-gold);
+	background: var(--fl-color-gold);
+	color: var(--fl-color-primary);
+}
+
+[data-admin-theme] .admin-button--primary:hover {
+	border-color: var(--fl-color-gold-hover);
+	background: var(--fl-color-gold-hover);
+}
+
+[data-admin-theme] .admin-button--secondary:hover {
+	background: var(--fl-color-background);
+}
+
+[data-admin-theme] .admin-input {
+	width: 100%;
+	min-height: 40px;
+	padding: 8px 11px;
+	border: 1px solid var(--fl-color-border);
+	border-radius: 7px;
+	background: var(--fl-color-surface);
+	color: var(--fl-color-text);
+	font: inherit;
+}
+
+[data-admin-theme] .admin-input:focus-visible {
+	border-color: var(--fl-color-gold);
+}
+
+[data-admin-theme] .admin-badge {
+	display: inline-flex;
+	min-height: 22px;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+[data-admin-theme] .admin-badge--success {
+	background: #e8f4ed;
+	color: var(--fl-color-success);
+}
+
+[data-admin-theme] .admin-badge--warning {
+	background: #fbf2df;
+	color: #95670b;
+}
+
+[data-admin-theme] .admin-badge--danger {
+	background: #fbeaec;
+	color: #b42332;
+}
+
+[data-admin-theme] .admin-badge--info {
+	background: #e9f1f9;
+	color: #1d5e9d;
+}

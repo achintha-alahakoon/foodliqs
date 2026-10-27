@@ -1,0 +1,123 @@
+<div
+	class="admin-shell"
+	data-admin-theme
+	[class.is-collapsed]="isSidebarCollapsed"
+	[class.mobile-open]="isMobileSidebarOpen"
+>
+	<button
+		class="sidebar-backdrop"
+		[class.is-visible]="isMobileSidebarOpen"
+		type="button"
+		aria-label="Close navigation"
+		[attr.aria-hidden]="isMobileSidebarOpen ? null : 'true'"
+		(click)="closeMobileSidebar()"
+	></button>
+
+	<aside
+		id="admin-sidebar"
+		class="sidebar"
+		aria-label="Admin navigation"
+		[attr.inert]="sidebarInert || isLogoutDialogOpen ? '' : null"
+	>
+		<a class="brand" routerLink="/admin/dashboard" aria-label="FOODLIQS admin home">
+			<i class="brand-icon bi bi-basket2-fill" aria-hidden="true"></i>
+			<span class="brand-name"><span>FOOD</span><strong>LIQS</strong></span>
+		</a>
+
+		<nav class="navigation" aria-label="Main">
+			<span class="nav-caption">Workspace</span>
+			<a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
+				<span class="nav-text">Dashboard</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/orders" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+				<span class="nav-text">Orders</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/shops" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-shop" aria-hidden="true"></i>
+				<span class="nav-text">Shops</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/categories" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-tags" aria-hidden="true"></i>
+				<span class="nav-text">Categories</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/products" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-box-seam" aria-hidden="true"></i>
+				<span class="nav-text">Products</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/riders" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-bicycle" aria-hidden="true"></i>
+				<span class="nav-text">Riders</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/cod" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-cash-coin" aria-hidden="true"></i>
+				<span class="nav-text">COD Management</span>
+			</a>
+			<a class="nav-item" routerLink="/admin/settings/delivery" routerLinkActive="active" ariaCurrentWhenActive="page">
+				<i class="bi bi-sliders" aria-hidden="true"></i>
+				<span class="nav-text">Delivery Settings</span>
+			</a>
+		</nav>
+
+		<div class="account">
+			<span class="avatar" aria-hidden="true">A</span>
+			<span class="account-copy">
+				<strong>Administrator</strong>
+				<small>FOODLIQS Admin</small>
+			</span>
+			<button #logoutButton class="logout-button" type="button" aria-label="Sign out" title="Sign out" (click)="openLogoutDialog()">
+				<i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+				<span>Sign out</span>
+			</button>
+		</div>
+	</aside>
+
+	@if (isLogoutDialogOpen) {
+		<app-confirm-dialog
+			title="Sign out?"
+			message="Are you sure you want to sign out of FOODLIQS?"
+			confirmText="Sign out"
+			cancelText="Stay signed in"
+			iconClass="bi-box-arrow-right"
+			tone="danger"
+			(confirmed)="confirmLogout()"
+			(cancelled)="cancelLogout()"
+		/>
+	}
+
+	<div class="main-panel" [attr.inert]="isLogoutDialogOpen ? '' : null">
+		<header class="topbar">
+			<div class="header-start">
+				<button
+					class="sidebar-toggle"
+					type="button"
+					aria-label="Toggle navigation"
+					aria-controls="admin-sidebar"
+					[attr.aria-expanded]="sidebarExpanded"
+					(click)="toggleSidebar()"
+				>
+					<i class="bi bi-list" aria-hidden="true"></i>
+				</button>
+				<div class="page-heading">
+					<h1>{{ pageTitle }}</h1>
+				</div>
+			</div>
+			<div class="header-actions">
+				<time class="today" [attr.datetime]="todayIso">{{ todayLabel }}</time>
+				<button class="icon-button notification-button" type="button" aria-label="Notifications">
+					<i class="bi bi-bell" aria-hidden="true"></i>
+				</button>
+				<button class="header-profile" type="button" aria-label="Administrator profile menu">
+					<span class="avatar">A</span>
+					<span class="header-profile-copy"><strong>Administrator</strong><small>Admin</small></span>
+					<i class="chevron bi bi-chevron-down" aria-hidden="true"></i>
+				</button>
+			</div>
+		</header>
+
+		<main class="page-content" aria-label="Admin page content">
+			<router-outlet />
+		</main>
+	</div>
+</div>

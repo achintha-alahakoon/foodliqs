@@ -1,0 +1,48 @@
+<section class="dashboard-page" aria-label="Dashboard overview">
+	<div class="metric-grid">
+		@for (metric of metrics; track metric.label) {
+			<article class="metric-card">
+				<div class="metric-label">
+					<span>{{ metric.label }}</span>
+					<i class="bi" [class]="'bi ' + metric.icon" aria-hidden="true"></i>
+				</div>
+				<strong class="metric-value">{{ metric.value }}</strong>
+				<p class="metric-change" [class.is-neutral]="metric.trend === 'neutral'">
+					<i class="bi" [class]="'bi ' + (metric.trend === 'up' ? 'bi-arrow-up' : 'bi-dash-lg')" aria-hidden="true"></i>
+					{{ metric.change }}
+				</p>
+			</article>
+		}
+	</div>
+
+	<div class="dashboard-grid">
+		<section class="dashboard-panel chart-panel" aria-labelledby="daily-orders-title">
+			<h2 id="daily-orders-title">Daily Orders</h2>
+			<div class="chart-container">
+				<canvas
+					#ordersChart
+					class="orders-chart"
+					role="img"
+					aria-label="Daily orders increased from 8 AM to 8 PM, reaching a peak of 58 orders"
+				></canvas>
+			</div>
+		</section>
+
+		<section class="dashboard-panel recent-panel" aria-labelledby="recent-orders-title">
+			<header class="panel-heading">
+				<h2 id="recent-orders-title">Recent Orders</h2>
+				<a routerLink="/admin/orders">View All</a>
+			</header>
+			<div class="recent-orders" role="list" aria-label="Recent orders">
+				@for (order of recentOrders; track order.id) {
+					<div class="order-row" role="listitem">
+						<strong class="order-id">{{ order.id }}</strong>
+						<time class="order-time">{{ order.time }}</time>
+						<span class="order-status" [class]="'order-status is-' + order.tone">{{ order.status }}</span>
+						<span class="order-amount">{{ order.amount }}</span>
+					</div>
+				}
+			</div>
+		</section>
+	</div>
+</section>

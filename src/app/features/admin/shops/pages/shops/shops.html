@@ -1,0 +1,68 @@
+<section class="shops-page" aria-label="Shop management">
+	<div class="shop-metrics">
+		<article class="shop-metric"><div><span>Total Registered Shops</span><strong>{{ shops.length }}</strong></div><i class="metric-icon is-gold bi bi-shop" aria-hidden="true"></i></article>
+		<article class="shop-metric"><div><span>Active Partner Shops</span><strong>{{ activeCount }}</strong></div><i class="metric-icon is-green bi bi-check-circle" aria-hidden="true"></i></article>
+		<article class="shop-metric"><div><span>Coverage Area Radius</span><strong>{{ coverageRadius }}</strong><small>Centres Parakaduwa Town</small></div><i class="metric-icon is-blue bi bi-geo-alt" aria-hidden="true"></i></article>
+		<article class="shop-metric"><div><span>Avg. Partner Rating</span><strong>4.75 <span class="rating-star">★</span></strong></div><i class="metric-icon is-orange bi bi-stars" aria-hidden="true"></i></article>
+	</div>
+
+	<div class="shop-toolbar">
+		<label class="shop-search" for="shop-search">
+			<i class="bi bi-search" aria-hidden="true"></i>
+			<input id="shop-search" type="search" placeholder="Search shop by name, address or ID..." [(ngModel)]="searchTerm" />
+		</label>
+		<div class="status-control" role="group" aria-label="Filter shops by status">
+			<span class="status-label"><i class="bi bi-funnel" aria-hidden="true"></i> Status:</span>
+			<div class="status-segment">
+				@for (status of ['All', 'Active', 'Inactive']; track status) {
+					<button type="button" [class.is-selected]="statusFilter === status" [attr.aria-pressed]="statusFilter === status" (click)="setStatusFilter($any(status))">{{ status }}</button>
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="shops-table-wrap">
+		<table class="shops-table">
+			<thead><tr><th scope="col">Shop info</th><th scope="col">Contact &amp; location</th><th scope="col">Coordinates (Lat / Lng)</th><th scope="col">Categories offered</th><th scope="col">Status</th><th scope="col" class="actions-heading">Actions</th></tr></thead>
+			<tbody>
+				@for (shop of filteredShops; track shop.id) {
+					<tr>
+						<td><div class="shop-info">
+							<span class="shop-thumbnail" [class]="'shop-thumbnail is-' + shop.thumbnail" aria-hidden="true"><i class="bi bi-shop-window"></i></span>
+							<div class="shop-copy"><strong>{{ shop.name }}</strong><small class="shop-id">{{ shop.id }}</small><small class="shop-rating">Rating: {{ shop.rating.toFixed(1) }} <span aria-hidden="true">★</span></small></div>
+						</div></td>
+						<td><div class="contact-details"><span><i class="bi bi-telephone" aria-hidden="true"></i>{{ shop.phone }}</span><span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ shop.address }}</span></div></td>
+						<td><code class="coordinates">Lat: {{ shop.latitude }}<br />Lng: {{ shop.longitude }}</code></td>
+						<td><div class="shop-categories">@for (category of shop.categories; track category) { <span>{{ category }}</span> }</div></td>
+						<td><span class="shop-status" [class.is-inactive]="shop.status === 'Inactive'"><i></i>{{ shop.status }}</span></td>
+						<td class="shop-actions">
+							<button type="button" class="icon-action" [attr.aria-label]="'Edit ' + shop.name" title="Edit shop" (click)="editShop(shop)"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+							<button type="button" class="icon-action is-delete" [attr.aria-label]="'Delete ' + shop.name" title="Delete shop" (click)="requestDelete(shop)"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+						</td>
+					</tr>
+				} @empty {
+					<tr><td class="empty-state" colspan="6">No shops match your search or status filter.</td></tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	@if (editDraft; as shop) {
+		<div class="shop-modal-backdrop" (click)="editDraft = null">
+			<section class="shop-modal" role="dialog" aria-modal="true" aria-labelledby="edit-shop-title" (click)="$event.stopPropagation()">
+				<header><h2 id="edit-shop-title">Edit shop</h2><button type="button" aria-label="Close edit form" (click)="editDraft = null"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+				<form (ngSubmit)="saveShop()">
+					<label>Shop name<input name="name" [(ngModel)]="shop.name" required /></label>
+					<label>Phone number<input name="phone" [(ngModel)]="shop.phone" required /></label>
+					<label>Address<input name="address" [(ngModel)]="shop.address" required /></label>
+					<label>Status<select name="status" [(ngModel)]="shop.status"><option>Active</option><option>Inactive</option></select></label>
+					<footer><button class="cancel-button" type="button" (click)="editDraft = null">Cancel</button><button class="save-button" type="submit">Save changes</button></footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	@if (shopToDelete; as shop) {
+		<app-confirm-dialog title="Delete shop?" [message]="'Delete ' + shop.name + ' from your partner shops?'" confirmText="Delete shop" cancelText="Keep shop" iconClass="bi-trash3-fill" confirmIconClass="bi-trash3" tone="danger" (confirmed)="confirmDelete()" (cancelled)="shopToDelete = null" />
+	}
+</section>

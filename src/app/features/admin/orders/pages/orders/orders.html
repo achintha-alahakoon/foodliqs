@@ -1,0 +1,117 @@
+<section class="orders-page" aria-label="Orders">
+	<div class="order-tabs" role="tablist" aria-label="Filter orders by status">
+		@for (tab of tabs; track tab.group) {
+			<button
+				class="order-tab"
+				[class.is-active]="activeTab === tab.group"
+				role="tab"
+				[attr.aria-selected]="activeTab === tab.group"
+				type="button"
+				(click)="setActiveTab(tab.group)"
+			>
+				{{ tab.label }} <span>({{ tab.count }})</span>
+			</button>
+		}
+	</div>
+
+	<div class="orders-toolbar">
+		<label class="order-search" for="order-search-input">
+			<i class="bi bi-search" aria-hidden="true"></i>
+			<input
+				id="order-search-input"
+				type="search"
+				placeholder="Search by order ID, customer name..."
+				[value]="searchTerm"
+				(input)="updateSearch($event)"
+			/>
+		</label>
+		<div class="filter-wrap">
+			<button
+				class="filter-button"
+				[class.is-active]="filterMenuOpen || statusFilter !== 'all'"
+				type="button"
+				aria-label="Filter orders"
+				aria-controls="order-filter-menu"
+				[attr.aria-expanded]="filterMenuOpen"
+				(click)="filterMenuOpen = !filterMenuOpen"
+			>
+				<i class="bi bi-funnel" aria-hidden="true"></i>
+			</button>
+			@if (filterMenuOpen) {
+				<div id="order-filter-menu" class="filter-menu">
+					<label for="status-filter">Status</label>
+					<select id="status-filter" name="statusFilter" [(ngModel)]="statusFilter">
+						<option value="all">All statuses</option>
+						<option value="pending">Pending</option>
+						<option value="confirmed">Confirmed</option>
+						<option value="outgoing">Out for Delivery</option>
+						<option value="delivered">Delivered</option>
+					</select>
+					<button type="button" (click)="resetFilters()">Reset filters</button>
+				</div>
+			}
+		</div>
+	</div>
+
+	<p class="copy-message" role="status" aria-live="polite">{{ copyMessage }}</p>
+
+	<div class="orders-table-wrap">
+		<table class="orders-table">
+			<thead>
+				<tr>
+					<th scope="col">Order ID</th>
+					<th scope="col">Customer</th>
+					<th scope="col">Total</th>
+					<th scope="col">Status</th>
+					<th scope="col" class="action-heading">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (order of filteredOrders; track order.id) {
+					<tr>
+						<td class="order-id">{{ order.id }}</td>
+						<td class="customer-name">{{ order.customer }}</td>
+						<td class="order-total">{{ order.total }}</td>
+						<td><span class="status-pill" [class]="'status-pill is-' + order.tone">{{ order.status }}</span></td>
+						<td class="action-cell">
+							<button
+								class="row-action-button"
+								type="button"
+								[attr.aria-label]="'Actions for order ' + order.id"
+								[attr.aria-expanded]="actionMenuFor === order.id"
+								(click)="toggleActions(order.id)"
+							>
+								<i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+							</button>
+							@if (actionMenuFor === order.id) {
+								<div class="row-action-menu" role="menu">
+									<button type="button" role="menuitem" (click)="showDetails(order)">View details</button>
+									<button type="button" role="menuitem" (click)="copyOrderId(order.id)">Copy order ID</button>
+								</div>
+							}
+						</td>
+					</tr>
+				} @empty {
+					<tr class="empty-row"><td colspan="5">No orders match your search or filters.</td></tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	@if (selectedOrder; as order) {
+		<div class="details-backdrop" (click)="closeDetails()">
+			<section class="details-dialog" role="dialog" aria-modal="true" aria-labelledby="order-details-title" (click)="$event.stopPropagation()">
+				<header>
+					<h2 id="order-details-title">Order details</h2>
+					<button type="button" aria-label="Close order details" (click)="closeDetails()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+				</header>
+				<dl>
+					<div><dt>Order ID</dt><dd>{{ order.id }}</dd></div>
+					<div><dt>Customer</dt><dd>{{ order.customer }}</dd></div>
+					<div><dt>Total</dt><dd>{{ order.total }}</dd></div>
+					<div><dt>Status</dt><dd>{{ order.status }}</dd></div>
+				</dl>
+			</section>
+		</div>
+	}
+</section>

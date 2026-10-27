@@ -1,0 +1,32 @@
+<div class="confirm-backdrop" (click)="onCancel()">
+  <section
+    class="confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="confirm-dialog-title"
+    aria-describedby="confirm-dialog-message"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="confirm-header">
+      <span class="confirm-icon" [class.is-danger]="tone === 'danger'">
+        <i class="bi" [ngClass]="iconClass" aria-hidden="true"></i>
+      </span>
+      <button class="confirm-close" type="button" aria-label="Close dialog" (click)="onCancel()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <h2 id="confirm-dialog-title">{{ title }}</h2>
+    <p id="confirm-dialog-message">{{ message }}</p>
+
+    <footer class="confirm-footer">
+      <button #cancelButton class="btn-cancel" type="button" (click)="onCancel()">
+        {{ cancelText }}
+      </button>
+      <button class="btn-confirm" [class.is-danger]="tone === 'danger'" type="button" (click)="onConfirm()">
+        <i class="bi" [ngClass]="confirmIconClass" aria-hidden="true"></i>
+        {{ confirmText }}
+      </button>
+    </footer>
+  </section>
+</div>

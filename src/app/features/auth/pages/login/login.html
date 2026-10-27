@@ -1,0 +1,77 @@
+<main class="login-page">
+	<section class="login-card" aria-labelledby="login-title">
+		<a class="login-brand" routerLink="/login" aria-label="FOODLIQS login">
+			<i class="bi bi-basket2-fill" aria-hidden="true"></i>
+			<span>FOOD<strong>LIQS</strong></span>
+		</a>
+
+		<header class="login-heading">
+			<h1 id="login-title">Admin Portal</h1>
+			<p>Sign in to your account</p>
+		</header>
+
+		<form (ngSubmit)="submitLogin()" #loginForm="ngForm" autocomplete="on">
+			<div class="form-field">
+				<label for="username">Username</label>
+				<div class="input-wrap">
+					<i class="bi bi-envelope" aria-hidden="true"></i>
+					<input
+						id="username"
+						name="username"
+						type="text"
+						[(ngModel)]="username"
+						placeholder="Enter your username"
+						autocomplete="username"
+						required
+						[attr.aria-invalid]="statusKind === 'error' && statusMessage ? 'true' : null"
+					/>
+				</div>
+			</div>
+
+			<div class="form-field">
+				<label for="password">Password</label>
+				<div class="input-wrap">
+					<i class="bi bi-lock" aria-hidden="true"></i>
+					<input
+						id="password"
+						name="password"
+						[type]="passwordVisible ? 'text' : 'password'"
+						[(ngModel)]="password"
+						placeholder="Enter your password"
+						autocomplete="current-password"
+						required
+						[attr.aria-invalid]="statusKind === 'error' && statusMessage ? 'true' : null"
+					/>
+					<button
+						class="password-toggle"
+						type="button"
+						[attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'"
+						[attr.aria-pressed]="passwordVisible"
+						(click)="passwordVisible = !passwordVisible"
+					>
+						<i class="bi" [class.bi-eye]="!passwordVisible" [class.bi-eye-slash]="passwordVisible" aria-hidden="true"></i>
+					</button>
+				</div>
+			</div>
+
+			<div class="form-options">
+				<label class="remember-option">
+					<input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe" />
+					<span>Remember me</span>
+				</label>
+				<button class="forgot-link" type="button" (click)="showPasswordHelp()">Forgot password?</button>
+			</div>
+
+			<p class="form-message" [class.is-error]="statusKind === 'error'" [class.is-info]="statusKind === 'info'" role="status" aria-live="polite" [hidden]="!statusMessage">
+				{{ statusMessage }}
+			</p>
+
+			<button class="submit-button" type="submit" [disabled]="loginForm.invalid">
+				<span>Sign In</span>
+			</button>
+		</form>
+
+		<div class="separator" aria-hidden="true"><span></span><small>or</small><span></span></div>
+		<p class="security-note"><i class="bi bi-shield-lock" aria-hidden="true"></i> Secure access for FOODLIQS administrators</p>
+	</section>
+</main>

@@ -1,0 +1,55 @@
+:host { display: block; min-width: 0; }
+
+.dashboard-page { display: grid; gap: 18px; }
+.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.metric-card, .dashboard-panel { min-width: 0; border: 1px solid var(--fl-color-border); border-radius: 9px; background: var(--fl-color-surface); box-shadow: var(--fl-shadow-card); }
+.metric-card { display: flex; min-height: 132px; flex-direction: column; padding: 18px 19px 14px; }
+.metric-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--fl-color-muted); font-size: 13px; font-weight: 550; }
+.metric-label .bi { color: #a77e13; font-size: 16px; }
+.metric-value { margin-top: 9px; color: var(--fl-color-text); font-size: 23px; font-weight: 700; line-height: 1.15; }
+.metric-change { display: flex; align-items: center; gap: 5px; margin: auto 0 0; padding-top: 12px; color: var(--fl-color-success); font-size: 13px; font-weight: 650; }
+.metric-change.is-neutral { color: #9aa2ac; }
+
+.dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: 18px; }
+.dashboard-panel { min-height: 326px; padding: 18px 19px 14px; }
+.dashboard-panel h2 { margin: 0; color: var(--fl-color-text); font-size: 16px; font-weight: 700; }
+.chart-panel { display: flex; min-height: 326px; flex-direction: column; }
+.chart-container { position: relative; min-height: 0; flex: 1; margin-top: 14px; }
+.orders-chart { display: block; width: 100%; height: 100%; }
+
+.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.panel-heading a { color: #3478c8; font-size: 12px; font-weight: 650; text-decoration: none; }
+.panel-heading a:hover { color: #1d5e9d; text-decoration: underline; }
+.recent-orders { margin-top: 12px; }
+.order-row { display: grid; min-height: 50px; grid-template-columns: minmax(54px, .75fr) minmax(64px, .9fr) minmax(94px, 1.35fr) minmax(70px, .9fr); align-items: center; gap: 8px; border-bottom: 1px solid #f0f1f2; font-size: 12px; }
+.order-row:last-child { border-bottom: 0; }
+.order-id { color: #263547; font-size: 12px; font-weight: 700; }
+.order-time { color: #768292; white-space: nowrap; }
+.order-status { justify-self: start; padding: 4px 8px; border-radius: 7px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.order-status.is-delivered { background: #dff4e9; color: #258451; }
+.order-status.is-outgoing { background: #fff0df; color: #ba6418; }
+.order-status.is-confirmed { background: #e4f2f1; color: #357b78; }
+.order-status.is-preparing { background: #fff1c8; color: #a77508; }
+.order-amount { overflow: hidden; color: #465362; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+
+.panel-heading a:focus-visible { outline: 3px solid var(--fl-color-gold); outline-offset: 3px; }
+
+@media (max-width: 980px) {
+	.metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 520px) {
+	.dashboard-page, .dashboard-grid { gap: 12px; }
+	.metric-grid { gap: 10px; }
+	.metric-card { min-height: 118px; padding: 14px; }
+	.metric-label { font-size: 12px; }
+	.metric-value { font-size: 20px; }
+	.dashboard-panel { min-height: auto; padding: 16px 14px 12px; }
+	.chart-panel { min-height: 275px; }
+	.chart-container { min-height: 215px; }
+	.order-row { grid-template-columns: minmax(50px, .7fr) minmax(58px, .8fr) minmax(82px, 1.2fr) minmax(61px, .8fr); gap: 5px; font-size: 10px; }
+	.order-id { font-size: 10px; }
+	.order-status { padding: 4px 6px; font-size: 9px; }
+	.order-amount { font-size: 10px; }
+}
