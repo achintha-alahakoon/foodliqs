@@ -1,0 +1,416 @@
+<section class="cod-page" aria-label="Cash on delivery management">
+	@if (toastMessage) {
+		<div class="feedback-banner" role="status" aria-live="polite">
+			<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+			<span>{{ toastMessage }}</span>
+		</div>
+	}
+
+	<!-- Metric Cards Header -->
+	<div class="cod-metrics">
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Pending Collection</span>
+				<strong class="metric-value">Rs. {{ totalPendingCod | number }}</strong>
+				<small class="metric-sub">Held in riders' hands</small>
+			</div>
+			<div class="metric-icon is-orange" aria-hidden="true">
+				<i class="bi bi-cash-coin"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Settled Today</span>
+				<strong class="metric-value">Rs. {{ totalSettledToday | number }}</strong>
+				<small class="metric-sub">Reconciled &amp; verified</small>
+			</div>
+			<div class="metric-icon is-green" aria-hidden="true">
+				<i class="bi bi-check-circle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Riders Holding Cash</span>
+				<strong class="metric-value">{{ ridersWithCashCount }}</strong>
+				<small class="metric-sub">Pending handover</small>
+			</div>
+			<div class="metric-icon is-blue" aria-hidden="true">
+				<i class="bi bi-people"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Reconciled Vouchers</span>
+				<strong class="metric-value">{{ transactions.length }}</strong>
+				<small class="metric-sub">Verified handover logs</small>
+			</div>
+			<div class="metric-icon is-gold" aria-hidden="true">
+				<i class="bi bi-receipt"></i>
+			</div>
+		</article>
+	</div>
+
+	<!-- Navigation Tabs & Toolbar -->
+	<div class="cod-header-controls">
+		<div class="view-tabs" role="tablist" aria-label="COD Views">
+			<button
+				type="button"
+				class="view-tab"
+				[class.is-active]="activeTab === 'riders'"
+				role="tab"
+				[attr.aria-selected]="activeTab === 'riders'"
+				(click)="setActiveTab('riders')"
+			>
+				<i class="bi bi-wallet2" aria-hidden="true"></i>
+				<span>Rider Cash Holdings</span>
+				@if (ridersWithCashCount > 0) {
+					<span class="tab-badge is-warning">{{ ridersWithCashCount }}</span>
+				}
+			</button>
+
+			<button
+				type="button"
+				class="view-tab"
+				[class.is-active]="activeTab === 'history'"
+				role="tab"
+				[attr.aria-selected]="activeTab === 'history'"
+				(click)="setActiveTab('history')"
+			>
+				<i class="bi bi-clock-history" aria-hidden="true"></i>
+				<span>Settlement History</span>
+				<span class="tab-badge">{{ transactions.length }}</span>
+			</button>
+		</div>
+
+		<div class="cod-toolbar admin-card">
+			<div class="toolbar-left">
+				<label class="cod-search" for="cod-search-input">
+					<i class="bi bi-search" aria-hidden="true"></i>
+					<input
+						id="cod-search-input"
+						type="search"
+						[placeholder]="activeTab === 'riders' ? 'Search rider by name, phone, zone...' : 'Search voucher by ID, reference, rider...'"
+						[(ngModel)]="searchTerm"
+					/>
+				</label>
+
+				<div class="status-control" role="group" aria-label="Filter by settlement status">
+					<div class="status-segment">
+						@for (status of ['All', 'Pending', 'Settled']; track status) {
+							<button
+								type="button"
+								[class.is-selected]="statusFilter === status"
+								[attr.aria-pressed]="statusFilter === status"
+								(click)="setStatusFilter($any(status))"
+							>
+								{{ status }}
+							</button>
+						}
+					</div>
+				</div>
+			</div>
+
+			<button class="admin-button admin-button--primary record-btn" type="button" (click)="openSettleModal()">
+				<i class="bi bi-plus-circle" aria-hidden="true"></i>
+				<span>Record Settlement</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- TAB 1: Rider Balances Table -->
+	@if (activeTab === 'riders') {
+		<div class="cod-table-wrap admin-card">
+			<table class="cod-table">
+				<thead>
+					<tr>
+						<th scope="col">Rider Profile</th>
+						<th scope="col">Assigned Zone</th>
+						<th scope="col">Orders Delivered</th>
+						<th scope="col">Cash In-Hand</th>
+						<th scope="col">Last Handover</th>
+						<th scope="col">Status</th>
+						<th scope="col" class="th-actions">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (rider of filteredRiders; track rider.riderId) {
+						<tr>
+							<td>
+								<div class="rider-cell">
+									<span
+										class="rider-avatar"
+										[class]="'rider-avatar is-' + rider.avatarTone"
+										aria-hidden="true"
+									>
+										{{ rider.riderName.charAt(0) }}
+									</span>
+									<div class="rider-meta">
+										<strong class="rider-name">{{ rider.riderName }}</strong>
+										<div class="rider-sub">
+											<code class="rider-id">{{ rider.riderId }}</code>
+											<span class="rider-phone">{{ rider.phone }}</span>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td>
+								<span class="zone-badge">
+									<i class="bi bi-geo-alt" aria-hidden="true"></i>
+									{{ rider.zone }}
+								</span>
+							</td>
+							<td>
+								<span class="orders-count">{{ rider.ordersDelivered }} orders</span>
+							</td>
+							<td>
+								<div class="amount-cell">
+									<strong class="amount-value" [class.is-due]="rider.totalCollected > 0">
+										Rs. {{ rider.totalCollected | number }}
+									</strong>
+									@if (rider.totalCollected > 0) {
+										<small class="amount-tag">Due for Handover</small>
+									}
+								</div>
+							</td>
+							<td>
+								<span class="time-label">{{ rider.lastSettlementTime }}</span>
+							</td>
+							<td>
+								<span
+									class="status-pill"
+									[class.is-pending]="rider.status === 'Pending'"
+									[class.is-settled]="rider.status === 'Settled'"
+								>
+									{{ rider.status === 'Pending' ? 'Pending Handover' : 'Fully Settled' }}
+								</span>
+							</td>
+							<td class="td-actions">
+								<div class="action-buttons">
+									@if (rider.totalCollected > 0) {
+										<button
+											type="button"
+											class="settle-btn"
+											title="Record cash handover"
+											(click)="openSettleModal(rider)"
+										>
+											<i class="bi bi-check2-circle" aria-hidden="true"></i>
+											<span>Settle</span>
+										</button>
+										<button
+											type="button"
+											class="quick-settle-btn"
+											title="Quick Full Settle"
+											[attr.aria-label]="'Quick full settle for ' + rider.riderName"
+											(click)="requestQuickSettle(rider)"
+										>
+											<i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+										</button>
+									} @else {
+										<span class="clear-pill">
+											<i class="bi bi-check2" aria-hidden="true"></i>
+											Clear
+										</span>
+									}
+								</div>
+							</td>
+						</tr>
+					} @empty {
+						<tr>
+							<td class="empty-state" colspan="7">
+								<div class="empty-wrap">
+									<i class="bi bi-wallet2" aria-hidden="true"></i>
+									<p>No rider cash records found matching your search or filter.</p>
+									<button type="button" class="admin-button" (click)="resetAllFilters()">
+										Reset filters
+									</button>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+
+	<!-- TAB 2: Settlement History Table -->
+	@if (activeTab === 'history') {
+		<div class="cod-table-wrap admin-card">
+			<table class="cod-table">
+				<thead>
+					<tr>
+						<th scope="col">Voucher ID &amp; Date</th>
+						<th scope="col">Rider</th>
+						<th scope="col">Amount Reconciled</th>
+						<th scope="col">Handover Method</th>
+						<th scope="col">Reference Number</th>
+						<th scope="col">Verified By</th>
+						<th scope="col">Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (tx of filteredTransactions; track tx.id) {
+						<tr>
+							<td>
+								<div class="voucher-cell">
+									<code class="voucher-id">{{ tx.id }}</code>
+									<time class="voucher-time">{{ tx.date }}</time>
+								</div>
+							</td>
+							<td>
+								<div class="rider-meta">
+									<strong class="rider-name">{{ tx.riderName }}</strong>
+									<span class="rider-id">{{ tx.riderId }}</span>
+								</div>
+							</td>
+							<td>
+								<strong class="amount-value is-settled-val">Rs. {{ tx.amount | number }}</strong>
+							</td>
+							<td>
+								<span class="method-badge">
+									<i class="bi" [class]="tx.paymentMethod === 'Hub Safe' ? 'bi-shield-check' : 'bi-cash'" aria-hidden="true"></i>
+									{{ tx.paymentMethod }}
+								</span>
+							</td>
+							<td>
+								<code class="ref-code">{{ tx.referenceNo }}</code>
+							</td>
+							<td>
+								<span class="verifier-name">{{ tx.verifiedBy }}</span>
+							</td>
+							<td>
+								<span class="status-pill is-settled">
+									<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+									Verified
+								</span>
+							</td>
+						</tr>
+					} @empty {
+						<tr>
+							<td class="empty-state" colspan="7">
+								<div class="empty-wrap">
+									<i class="bi bi-receipt" aria-hidden="true"></i>
+									<p>No transaction history matching your search or filter.</p>
+									<button type="button" class="admin-button" (click)="resetAllFilters()">
+										Reset filters
+									</button>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+
+	<!-- Settle Cash Modal Dialog -->
+	@if (isSettleModalOpen && settleDraft) {
+		<div class="modal-backdrop" (click)="closeSettleModal()">
+			<section
+				class="settle-modal admin-card"
+				role="dialog"
+				aria-modal="true"
+				[attr.aria-labelledby]="'modal-settle-title'"
+				(click)="$event.stopPropagation()"
+			>
+				<header class="modal-header">
+					<h2 id="modal-settle-title">Record Cash Settlement</h2>
+					<button
+						type="button"
+						class="close-modal-btn"
+						aria-label="Close dialog"
+						(click)="closeSettleModal()"
+					>
+						<i class="bi bi-x-lg" aria-hidden="true"></i>
+					</button>
+				</header>
+
+				<form (ngSubmit)="saveSettlement()" class="modal-form">
+					<div class="modal-rider-card">
+						<div>
+							<span class="card-label">Rider</span>
+							<strong class="card-name">{{ settleDraft.riderName }}</strong>
+							<small class="card-id">{{ settleDraft.riderId }}</small>
+						</div>
+						<div class="card-balance">
+							<span class="card-label">Outstanding In-Hand</span>
+							<strong class="card-amount">Rs. {{ settleDraft.outstandingAmount | number }}</strong>
+						</div>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Amount Handed Over (Rs.) *</span>
+							<input
+								class="admin-input"
+								name="amountToSettle"
+								type="number"
+								min="10"
+								[max]="settleDraft.outstandingAmount"
+								step="10"
+								[(ngModel)]="settleDraft.amountToSettle"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Handover Method *</span>
+							<select class="admin-input" name="paymentMethod" [(ngModel)]="settleDraft.paymentMethod">
+								<option value="Cash Handover">Cash Handover (Counter)</option>
+								<option value="Hub Safe">Hub Safe Deposit</option>
+								<option value="Bank Deposit">Bank Transfer / Deposit</option>
+							</select>
+						</label>
+					</div>
+
+					<label class="form-field">
+						<span class="field-label">Receipt / Voucher Reference No.</span>
+						<input
+							class="admin-input"
+							name="referenceNo"
+							type="text"
+							placeholder="e.g. REC-PK-8842"
+							[(ngModel)]="settleDraft.referenceNo"
+						/>
+					</label>
+
+					<label class="form-field">
+						<span class="field-label">Notes (optional)</span>
+						<textarea
+							class="admin-input modal-textarea"
+							name="notes"
+							rows="2"
+							placeholder="e.g. Afternoon shift collection handover verified"
+							[(ngModel)]="settleDraft.notes"
+						></textarea>
+					</label>
+
+					<footer class="modal-footer">
+						<button class="admin-button" type="button" (click)="closeSettleModal()">Cancel</button>
+						<button class="admin-button admin-button--primary" type="submit">
+							Confirm &amp; Reconcile
+						</button>
+					</footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	<!-- Quick Settle Confirmation Dialog -->
+	@if (riderToQuickSettle; as rider) {
+		<app-confirm-dialog
+			title="Confirm full settlement?"
+			[message]="'Confirm cash collection of Rs. ' + (rider.totalCollected | number) + ' from ' + rider.riderName + ' (' + rider.riderId + ')?'"
+			confirmText="Confirm Settlement"
+			cancelText="Cancel"
+			iconClass="bi-cash-coin"
+			confirmIconClass="bi-check2-circle"
+			tone="gold"
+			(confirmed)="confirmQuickSettle()"
+			(cancelled)="riderToQuickSettle = null"
+		/>
+	}
+</section>
+

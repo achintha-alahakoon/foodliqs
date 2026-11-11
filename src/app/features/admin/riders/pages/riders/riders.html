@@ -1,0 +1,388 @@
+<section class="riders-page" aria-label="Rider fleet management">
+	@if (toastMessage) {
+		<div class="feedback-banner" role="status" aria-live="polite">
+			<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+			<span>{{ toastMessage }}</span>
+		</div>
+	}
+
+	<!-- Metric Cards Header -->
+	<div class="rider-metrics">
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Total Fleet</span>
+				<strong class="metric-value">{{ riders.length }}</strong>
+				<small class="metric-sub">Registered delivery riders</small>
+			</div>
+			<div class="metric-icon is-gold" aria-hidden="true">
+				<i class="bi bi-bicycle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">On-Duty Fleet</span>
+				<strong class="metric-value">{{ onDutyCount }}</strong>
+				<small class="metric-sub">Active &amp; ready riders</small>
+			</div>
+			<div class="metric-icon is-green" aria-hidden="true">
+				<i class="bi bi-check-circle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">On Active Delivery</span>
+				<strong class="metric-value">{{ onDeliveryCount }}</strong>
+				<small class="metric-sub">Orders currently en route</small>
+			</div>
+			<div class="metric-icon is-blue" aria-hidden="true">
+				<i class="bi bi-geo-alt"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">COD In-Transit</span>
+				<strong class="metric-value">Rs. {{ totalCodHolding | number }}</strong>
+				<small class="metric-sub">Cash held by riders</small>
+			</div>
+			<div class="metric-icon is-orange" aria-hidden="true">
+				<i class="bi bi-cash-coin"></i>
+			</div>
+		</article>
+	</div>
+
+	<!-- Toolbar with search, filters, and Add button -->
+	<div class="rider-toolbar admin-card">
+		<div class="toolbar-left">
+			<label class="rider-search" for="rider-search-input">
+				<i class="bi bi-search" aria-hidden="true"></i>
+				<input
+					id="rider-search-input"
+					type="search"
+					placeholder="Search rider by name, phone, plate, ID..."
+					[(ngModel)]="searchTerm"
+				/>
+			</label>
+
+			<div class="filter-group">
+				<label class="dropdown-filter">
+					<span class="filter-label">Duty:</span>
+					<select [(ngModel)]="dutyFilter" (ngModelChange)="setDutyFilter($event)">
+						<option value="All">All Duties</option>
+						@for (duty of dutyStatusList; track duty) {
+							<option [value]="duty">{{ duty }}</option>
+						}
+					</select>
+				</label>
+
+				<label class="dropdown-filter">
+					<span class="filter-label">Zone:</span>
+					<select [(ngModel)]="zoneFilter" (ngModelChange)="setZoneFilter($event)">
+						<option value="All">All Zones</option>
+						@for (zone of zonesList; track zone) {
+							<option [value]="zone">{{ zone }}</option>
+						}
+					</select>
+				</label>
+			</div>
+
+			<div class="status-control" role="group" aria-label="Filter riders by admin status">
+				<div class="status-segment">
+					@for (status of ['All', 'Active', 'Inactive']; track status) {
+						<button
+							type="button"
+							[class.is-selected]="statusFilter === status"
+							[attr.aria-pressed]="statusFilter === status"
+							(click)="setStatusFilter($any(status))"
+						>
+							{{ status }}
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+
+		<button class="admin-button admin-button--primary add-btn" type="button" (click)="openCreateModal()">
+			<i class="bi bi-plus-lg" aria-hidden="true"></i>
+			<span>Add Rider</span>
+		</button>
+	</div>
+
+	<!-- Riders Data Table -->
+	<div class="riders-table-wrap admin-card">
+		<table class="riders-table">
+			<thead>
+				<tr>
+					<th scope="col">Rider Profile</th>
+					<th scope="col">Vehicle info</th>
+					<th scope="col">Assigned Zone</th>
+					<th scope="col">Performance</th>
+					<th scope="col">COD Holding</th>
+					<th scope="col">Duty Status</th>
+					<th scope="col">Status</th>
+					<th scope="col" class="th-actions">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (rider of filteredRiders; track rider.id) {
+					<tr>
+						<td>
+							<div class="rider-cell">
+								<span
+									class="rider-avatar"
+									[class]="'rider-avatar is-' + rider.avatarTone"
+									aria-hidden="true"
+								>
+									{{ rider.name.charAt(0) }}
+								</span>
+								<div class="rider-meta">
+									<strong class="rider-name">{{ rider.name }}</strong>
+									<div class="rider-sub">
+										<code class="rider-id">{{ rider.id }}</code>
+										<span class="rider-phone">
+											<i class="bi bi-telephone" aria-hidden="true"></i>
+											{{ rider.phone }}
+										</span>
+									</div>
+								</div>
+							</div>
+						</td>
+						<td>
+							<div class="vehicle-cell">
+								<span class="vehicle-type">
+									<i class="bi" [class]="getVehicleIcon(rider.vehicleType)" aria-hidden="true"></i>
+									{{ rider.vehicleType }}
+								</span>
+								<code class="vehicle-number">{{ rider.vehicleNumber }}</code>
+							</div>
+						</td>
+						<td>
+							<span class="zone-badge">
+								<i class="bi bi-geo-alt" aria-hidden="true"></i>
+								{{ rider.zone }}
+							</span>
+						</td>
+						<td>
+							<div class="performance-cell">
+								<span class="rating-badge">★ {{ rider.rating.toFixed(1) }}</span>
+								<small class="orders-count">{{ rider.completedDeliveries }} deliveries</small>
+							</div>
+						</td>
+						<td>
+							<div class="cod-cell" [class.has-cash]="rider.codHolding > 0">
+								<strong class="cod-value">Rs. {{ rider.codHolding | number }}</strong>
+								@if (rider.codHolding > 0) {
+									<span class="cod-pill">To Settle</span>
+								}
+							</div>
+						</td>
+						<td>
+							<span
+								class="duty-pill"
+								[class.is-available]="rider.dutyStatus === 'Available'"
+								[class.is-delivery]="rider.dutyStatus === 'On Delivery'"
+								[class.is-offline]="rider.dutyStatus === 'Offline'"
+							>
+								{{ rider.dutyStatus }}
+							</span>
+						</td>
+						<td>
+							<button
+								type="button"
+								class="status-toggle-btn"
+								[class.is-active]="rider.status === 'Active'"
+								[attr.aria-label]="'Status: ' + rider.status + '. Click to toggle.'"
+								(click)="toggleStatus(rider)"
+								title="Click to toggle status"
+							>
+								<span class="status-dot"></span>
+								<span>{{ rider.status }}</span>
+							</button>
+						</td>
+						<td class="td-actions">
+							<div class="action-buttons">
+								<button
+									type="button"
+									class="action-btn"
+									[attr.aria-label]="'Edit ' + rider.name"
+									title="Edit rider"
+									(click)="editRider(rider)"
+								>
+									<i class="bi bi-pencil" aria-hidden="true"></i>
+								</button>
+								<button
+									type="button"
+									class="action-btn is-danger"
+									[attr.aria-label]="'Delete ' + rider.name"
+									title="Delete rider"
+									(click)="requestDelete(rider)"
+								>
+									<i class="bi bi-trash3" aria-hidden="true"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				} @empty {
+					<tr>
+						<td class="empty-state" colspan="8">
+							<div class="empty-wrap">
+								<i class="bi bi-bicycle" aria-hidden="true"></i>
+								<p>No delivery riders found matching your search or filters.</p>
+								<button
+									type="button"
+									class="admin-button"
+									(click)="resetAllFilters()"
+								>
+									Reset filters
+								</button>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Add / Edit Rider Modal -->
+	@if (riderDraft; as draft) {
+		<div class="modal-backdrop" (click)="closeModal()">
+			<section
+				class="rider-modal admin-card"
+				role="dialog"
+				aria-modal="true"
+				[attr.aria-labelledby]="'modal-rider-title'"
+				(click)="$event.stopPropagation()"
+			>
+				<header class="modal-header">
+					<h2 id="modal-rider-title">{{ isCreateMode ? 'Add New Rider' : 'Edit Rider' }}</h2>
+					<button
+						type="button"
+						class="close-modal-btn"
+						aria-label="Close dialog"
+						(click)="closeModal()"
+					>
+						<i class="bi bi-x-lg" aria-hidden="true"></i>
+					</button>
+				</header>
+
+				<form (ngSubmit)="saveRider()" class="modal-form">
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Full Name *</span>
+							<input
+								class="admin-input"
+								name="name"
+								type="text"
+								placeholder="e.g. Kasun Madushanka"
+								[(ngModel)]="draft.name"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Phone Number *</span>
+							<input
+								class="admin-input"
+								name="phone"
+								type="tel"
+								placeholder="e.g. +94 77 123 4567"
+								[(ngModel)]="draft.phone"
+								required
+							/>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Vehicle Type *</span>
+							<select class="admin-input" name="vehicleType" [(ngModel)]="draft.vehicleType" required>
+								@for (v of vehicleTypes; track v) {
+									<option [value]="v">{{ v }}</option>
+								}
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Vehicle Number Plate *</span>
+							<input
+								class="admin-input"
+								name="vehicleNumber"
+								type="text"
+								placeholder="e.g. WP BIZ-4821"
+								[(ngModel)]="draft.vehicleNumber"
+								required
+							/>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Assigned Zone *</span>
+							<select class="admin-input" name="zone" [(ngModel)]="draft.zone" required>
+								@for (zone of zonesList; track zone) {
+									<option [value]="zone">{{ zone }}</option>
+								}
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Duty Status</span>
+							<select class="admin-input" name="dutyStatus" [(ngModel)]="draft.dutyStatus">
+								@for (duty of dutyStatusList; track duty) {
+									<option [value]="duty">{{ duty }}</option>
+								}
+							</select>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Admin Status</span>
+							<select class="admin-input" name="status" [(ngModel)]="draft.status">
+								<option value="Active">Active</option>
+								<option value="Inactive">Inactive</option>
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">COD In-Hand (Rs.)</span>
+							<input
+								class="admin-input"
+								name="codHolding"
+								type="number"
+								min="0"
+								step="50"
+								[(ngModel)]="draft.codHolding"
+							/>
+						</label>
+					</div>
+
+					<footer class="modal-footer">
+						<button class="admin-button" type="button" (click)="closeModal()">Cancel</button>
+						<button class="admin-button admin-button--primary" type="submit">
+							{{ isCreateMode ? 'Add Rider' : 'Save Changes' }}
+						</button>
+					</footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	<!-- Delete Confirmation Dialog -->
+	@if (riderToDelete; as rider) {
+		<app-confirm-dialog
+			title="Remove rider?"
+			[message]="'Are you sure you want to remove rider &quot;' + rider.name + '&quot; (' + rider.id + ') from your delivery fleet?'"
+			confirmText="Remove rider"
+			cancelText="Cancel"
+			iconClass="bi-trash3-fill"
+			confirmIconClass="bi-trash3"
+			tone="danger"
+			(confirmed)="confirmDelete()"
+			(cancelled)="riderToDelete = null"
+		/>
+	}
+</section>
+

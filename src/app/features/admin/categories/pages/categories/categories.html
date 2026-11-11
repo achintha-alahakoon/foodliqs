@@ -1,0 +1,330 @@
+<section class="categories-page" aria-label="Category management">
+	@if (toastMessage) {
+		<div class="feedback-banner" role="status" aria-live="polite">
+			<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+			<span>{{ toastMessage }}</span>
+		</div>
+	}
+
+	<!-- Metric Cards Header -->
+	<div class="category-metrics">
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Total Categories</span>
+				<strong class="metric-value">{{ categories.length }}</strong>
+				<small class="metric-sub">Catalog Sections</small>
+			</div>
+			<div class="metric-icon is-gold" aria-hidden="true">
+				<i class="bi bi-tags"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Active Categories</span>
+				<strong class="metric-value">{{ activeCount }}</strong>
+				<small class="metric-sub">Visible to customers</small>
+			</div>
+			<div class="metric-icon is-green" aria-hidden="true">
+				<i class="bi bi-check-circle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Total Menu Items</span>
+				<strong class="metric-value">{{ totalProducts }}</strong>
+				<small class="metric-sub">Across all partner shops</small>
+			</div>
+			<div class="metric-icon is-blue" aria-hidden="true">
+				<i class="bi bi-box-seam"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Top Category</span>
+				<strong class="metric-value metric-name">{{ topCategory?.name ?? 'None' }}</strong>
+				<small class="metric-sub">{{ topCategory?.productCount ?? 0 }} items listed</small>
+			</div>
+			<div class="metric-icon is-orange" aria-hidden="true">
+				<i class="bi bi-stars"></i>
+			</div>
+		</article>
+	</div>
+
+	<!-- Toolbar with search, filters, and Add button -->
+	<div class="category-toolbar admin-card">
+		<div class="toolbar-left">
+			<label class="category-search" for="category-search-input">
+				<i class="bi bi-search" aria-hidden="true"></i>
+				<input
+					id="category-search-input"
+					type="search"
+					placeholder="Search categories by name, code or description..."
+					[(ngModel)]="searchTerm"
+				/>
+			</label>
+
+			<div class="status-control" role="group" aria-label="Filter categories by status">
+				<span class="status-label"><i class="bi bi-funnel" aria-hidden="true"></i> Status:</span>
+				<div class="status-segment">
+					@for (status of ['All', 'Active', 'Inactive']; track status) {
+						<button
+							type="button"
+							[class.is-selected]="statusFilter === status"
+							[attr.aria-pressed]="statusFilter === status"
+							(click)="setStatusFilter($any(status))"
+						>
+							{{ status }}
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+
+		<button class="admin-button admin-button--primary add-btn" type="button" (click)="openCreateModal()">
+			<i class="bi bi-plus-lg" aria-hidden="true"></i>
+			<span>Add Category</span>
+		</button>
+	</div>
+
+	<!-- Categories Data Table -->
+	<div class="categories-table-wrap admin-card">
+		<table class="categories-table">
+			<thead>
+				<tr>
+					<th scope="col" class="th-order">#</th>
+					<th scope="col">Category</th>
+					<th scope="col">Description</th>
+					<th scope="col">Products</th>
+					<th scope="col">Partner Shops</th>
+					<th scope="col">Status</th>
+					<th scope="col" class="th-actions">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (cat of filteredCategories; track cat.id) {
+					<tr>
+						<td class="td-order">
+							<span class="order-badge">{{ cat.displayOrder }}</span>
+						</td>
+						<td>
+							<div class="category-cell">
+								<span
+									class="category-icon-box"
+									[class]="'category-icon-box is-' + cat.colorTone"
+									aria-hidden="true"
+								>
+									<i class="bi" [class]="'bi ' + cat.icon"></i>
+								</span>
+								<div class="category-titles">
+									<strong class="category-name">{{ cat.name }}</strong>
+									<div class="category-tags">
+										<code class="category-code">{{ cat.code }}</code>
+										<span class="category-id">{{ cat.id }}</span>
+									</div>
+								</div>
+							</div>
+						</td>
+						<td class="td-desc">
+							<p class="category-desc" [title]="cat.description">{{ cat.description }}</p>
+						</td>
+						<td>
+							<span class="stat-pill">
+								<i class="bi bi-box-seam" aria-hidden="true"></i>
+								<strong>{{ cat.productCount }}</strong>
+								<span>items</span>
+							</span>
+						</td>
+						<td>
+							<span class="stat-pill">
+								<i class="bi bi-shop" aria-hidden="true"></i>
+								<strong>{{ cat.shopCount }}</strong>
+								<span>shops</span>
+							</span>
+						</td>
+						<td>
+							<button
+								type="button"
+								class="status-toggle-btn"
+								[class.is-active]="cat.status === 'Active'"
+								[attr.aria-label]="'Status: ' + cat.status + '. Click to toggle.'"
+								(click)="toggleStatus(cat)"
+								title="Click to toggle status"
+							>
+								<span class="status-dot"></span>
+								<span>{{ cat.status }}</span>
+							</button>
+						</td>
+						<td class="td-actions">
+							<div class="action-buttons">
+								<button
+									type="button"
+									class="action-btn"
+									[attr.aria-label]="'Edit ' + cat.name"
+									title="Edit category"
+									(click)="editCategory(cat)"
+								>
+									<i class="bi bi-pencil" aria-hidden="true"></i>
+								</button>
+								<button
+									type="button"
+									class="action-btn is-danger"
+									[attr.aria-label]="'Delete ' + cat.name"
+									title="Delete category"
+									(click)="requestDelete(cat)"
+								>
+									<i class="bi bi-trash3" aria-hidden="true"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				} @empty {
+					<tr>
+						<td class="empty-state" colspan="7">
+							<div class="empty-wrap">
+								<i class="bi bi-inbox" aria-hidden="true"></i>
+								<p>No categories found matching your search or status filter.</p>
+								<button
+									type="button"
+									class="admin-button"
+									(click)="searchTerm = ''; statusFilter = 'All'"
+								>
+									Reset search &amp; filters
+								</button>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Add / Edit Category Modal Dialog -->
+	@if (categoryDraft; as draft) {
+		<div class="modal-backdrop" (click)="closeModal()">
+			<section
+				class="category-modal admin-card"
+				role="dialog"
+				aria-modal="true"
+				[attr.aria-labelledby]="'modal-title'"
+				(click)="$event.stopPropagation()"
+			>
+				<header class="modal-header">
+					<h2 id="modal-title">{{ isCreateMode ? 'Add New Category' : 'Edit Category' }}</h2>
+					<button
+						type="button"
+						class="close-modal-btn"
+						aria-label="Close dialog"
+						(click)="closeModal()"
+					>
+						<i class="bi bi-x-lg" aria-hidden="true"></i>
+					</button>
+				</header>
+
+				<form (ngSubmit)="saveCategory()" class="modal-form">
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Category Name *</span>
+							<input
+								class="admin-input"
+								name="name"
+								type="text"
+								placeholder="e.g. Rice & Curry"
+								[(ngModel)]="draft.name"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">URL Slug / Code</span>
+							<input
+								class="admin-input"
+								name="code"
+								type="text"
+								placeholder="e.g. rice-curry (auto-generated if empty)"
+								[(ngModel)]="draft.code"
+							/>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Icon</span>
+							<select class="admin-input" name="icon" [(ngModel)]="draft.icon">
+								@for (item of availableIcons; track item.value) {
+									<option [value]="item.value">{{ item.label }}</option>
+								}
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Color Theme</span>
+							<select class="admin-input" name="colorTone" [(ngModel)]="draft.colorTone">
+								@for (tone of availableTones; track tone) {
+									<option [value]="tone">{{ tone | titlecase }}</option>
+								}
+							</select>
+						</label>
+					</div>
+
+					<label class="form-field">
+						<span class="field-label">Description</span>
+						<textarea
+							class="admin-input modal-textarea"
+							name="description"
+							rows="2"
+							placeholder="Brief description of items in this category..."
+							[(ngModel)]="draft.description"
+						></textarea>
+					</label>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Display Order</span>
+							<input
+								class="admin-input"
+								name="displayOrder"
+								type="number"
+								min="1"
+								[(ngModel)]="draft.displayOrder"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Status</span>
+							<select class="admin-input" name="status" [(ngModel)]="draft.status">
+								<option value="Active">Active</option>
+								<option value="Inactive">Inactive</option>
+							</select>
+						</label>
+					</div>
+
+					<footer class="modal-footer">
+						<button class="admin-button" type="button" (click)="closeModal()">Cancel</button>
+						<button class="admin-button admin-button--primary" type="submit">
+							{{ isCreateMode ? 'Create Category' : 'Save Changes' }}
+						</button>
+					</footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	<!-- Delete Confirmation Dialog -->
+	@if (categoryToDelete; as cat) {
+		<app-confirm-dialog
+			title="Delete category?"
+			[message]="'Are you sure you want to delete category &quot;' + cat.name + '&quot;? Products in this category may become unassigned.'"
+			confirmText="Delete category"
+			cancelText="Cancel"
+			iconClass="bi-trash3-fill"
+			confirmIconClass="bi-trash3"
+			tone="danger"
+			(confirmed)="confirmDelete()"
+			(cancelled)="categoryToDelete = null"
+		/>
+	}
+</section>

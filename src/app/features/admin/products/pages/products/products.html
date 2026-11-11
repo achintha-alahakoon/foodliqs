@@ -1,0 +1,370 @@
+<section class="products-page" aria-label="Product management">
+	@if (toastMessage) {
+		<div class="feedback-banner" role="status" aria-live="polite">
+			<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+			<span>{{ toastMessage }}</span>
+		</div>
+	}
+
+	<!-- Metric Cards Header -->
+	<div class="product-metrics">
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Total Products</span>
+				<strong class="metric-value">{{ products.length }}</strong>
+				<small class="metric-sub">Catalog Menu Items</small>
+			</div>
+			<div class="metric-icon is-gold" aria-hidden="true">
+				<i class="bi bi-box-seam"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Active Items</span>
+				<strong class="metric-value">{{ activeCount }}</strong>
+				<small class="metric-sub">Orderable by customers</small>
+			</div>
+			<div class="metric-icon is-green" aria-hidden="true">
+				<i class="bi bi-check-circle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Stock Attention</span>
+				<strong class="metric-value">{{ stockAlertCount }}</strong>
+				<small class="metric-sub">Low or out of stock</small>
+			</div>
+			<div class="metric-icon is-orange" aria-hidden="true">
+				<i class="bi bi-exclamation-triangle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Average Price</span>
+				<strong class="metric-value">Rs. {{ averagePrice }}</strong>
+				<small class="metric-sub">Per menu item</small>
+			</div>
+			<div class="metric-icon is-blue" aria-hidden="true">
+				<i class="bi bi-cash-stack"></i>
+			</div>
+		</article>
+	</div>
+
+	<!-- Toolbar with search, filters, and Add button -->
+	<div class="product-toolbar admin-card">
+		<div class="toolbar-left">
+			<label class="product-search" for="product-search-input">
+				<i class="bi bi-search" aria-hidden="true"></i>
+				<input
+					id="product-search-input"
+					type="search"
+					placeholder="Search products by name, code or shop..."
+					[(ngModel)]="searchTerm"
+				/>
+			</label>
+
+			<div class="filter-group">
+				<label class="dropdown-filter">
+					<span class="filter-label">Category:</span>
+					<select [(ngModel)]="categoryFilter" (ngModelChange)="setCategoryFilter($event)">
+						<option value="All">All Categories</option>
+						@for (cat of categoriesList; track cat) {
+							<option [value]="cat">{{ cat }}</option>
+						}
+					</select>
+				</label>
+
+				<label class="dropdown-filter">
+					<span class="filter-label">Stock:</span>
+					<select [(ngModel)]="stockFilter" (ngModelChange)="setStockFilter($event)">
+						<option value="All">All Stocks</option>
+						@for (stock of stockStatusOptions; track stock) {
+							<option [value]="stock">{{ stock }}</option>
+						}
+					</select>
+				</label>
+			</div>
+
+			<div class="status-control" role="group" aria-label="Filter products by status">
+				<div class="status-segment">
+					@for (status of ['All', 'Active', 'Inactive']; track status) {
+						<button
+							type="button"
+							[class.is-selected]="statusFilter === status"
+							[attr.aria-pressed]="statusFilter === status"
+							(click)="setStatusFilter($any(status))"
+						>
+							{{ status }}
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+
+		<button class="admin-button admin-button--primary add-btn" type="button" (click)="openCreateModal()">
+			<i class="bi bi-plus-lg" aria-hidden="true"></i>
+			<span>Add Product</span>
+		</button>
+	</div>
+
+	<!-- Products Table -->
+	<div class="products-table-wrap admin-card">
+		<table class="products-table">
+			<thead>
+				<tr>
+					<th scope="col">Product info</th>
+					<th scope="col">Category</th>
+					<th scope="col">Partner Shop</th>
+					<th scope="col">Price</th>
+					<th scope="col">Stock Status</th>
+					<th scope="col">Status</th>
+					<th scope="col" class="th-actions">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@for (prod of filteredProducts; track prod.id) {
+					<tr>
+						<td>
+							<div class="product-cell">
+								<span
+									class="product-thumb"
+									[class]="'product-thumb is-' + prod.thumbnailClass"
+									aria-hidden="true"
+								>
+									<i class="bi bi-box-seam"></i>
+								</span>
+								<div class="product-meta">
+									<strong class="product-name">{{ prod.name }}</strong>
+									<div class="product-tags">
+										<code class="product-id">{{ prod.id }}</code>
+										<span class="product-rating">★ {{ prod.rating.toFixed(1) }}</span>
+									</div>
+								</div>
+							</div>
+						</td>
+						<td>
+							<span class="category-badge">{{ prod.category }}</span>
+						</td>
+						<td>
+							<span class="shop-name">
+								<i class="bi bi-shop" aria-hidden="true"></i>
+								{{ prod.shopName }}
+							</span>
+						</td>
+						<td>
+							<div class="price-cell">
+								<strong class="price-value">Rs. {{ prod.price | number }}</strong>
+								@if (prod.originalPrice) {
+									<del class="price-original">Rs. {{ prod.originalPrice | number }}</del>
+								}
+							</div>
+						</td>
+						<td>
+							<span
+								class="stock-pill"
+								[class.is-in]="prod.stockStatus === 'In Stock'"
+								[class.is-low]="prod.stockStatus === 'Low Stock'"
+								[class.is-out]="prod.stockStatus === 'Out of Stock'"
+							>
+								{{ prod.stockStatus }}
+							</span>
+						</td>
+						<td>
+							<button
+								type="button"
+								class="status-toggle-btn"
+								[class.is-active]="prod.status === 'Active'"
+								[attr.aria-label]="'Status: ' + prod.status + '. Click to toggle.'"
+								(click)="toggleStatus(prod)"
+								title="Click to toggle status"
+							>
+								<span class="status-dot"></span>
+								<span>{{ prod.status }}</span>
+							</button>
+						</td>
+						<td class="td-actions">
+							<div class="action-buttons">
+								<button
+									type="button"
+									class="action-btn"
+									[attr.aria-label]="'Edit ' + prod.name"
+									title="Edit product"
+									(click)="editProduct(prod)"
+								>
+									<i class="bi bi-pencil" aria-hidden="true"></i>
+								</button>
+								<button
+									type="button"
+									class="action-btn is-danger"
+									[attr.aria-label]="'Delete ' + prod.name"
+									title="Delete product"
+									(click)="requestDelete(prod)"
+								>
+									<i class="bi bi-trash3" aria-hidden="true"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				} @empty {
+					<tr>
+						<td class="empty-state" colspan="7">
+							<div class="empty-wrap">
+								<i class="bi bi-inbox" aria-hidden="true"></i>
+								<p>No products found matching your search or filters.</p>
+								<button
+									type="button"
+									class="admin-button"
+									(click)="resetAllFilters()"
+								>
+									Reset filters
+								</button>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Add / Edit Product Modal -->
+	@if (productDraft; as draft) {
+		<div class="modal-backdrop" (click)="closeModal()">
+			<section
+				class="product-modal admin-card"
+				role="dialog"
+				aria-modal="true"
+				[attr.aria-labelledby]="'modal-product-title'"
+				(click)="$event.stopPropagation()"
+			>
+				<header class="modal-header">
+					<h2 id="modal-product-title">{{ isCreateMode ? 'Add New Product' : 'Edit Product' }}</h2>
+					<button
+						type="button"
+						class="close-modal-btn"
+						aria-label="Close dialog"
+						(click)="closeModal()"
+					>
+						<i class="bi bi-x-lg" aria-hidden="true"></i>
+					</button>
+				</header>
+
+				<form (ngSubmit)="saveProduct()" class="modal-form">
+					<label class="form-field">
+						<span class="field-label">Product Name *</span>
+						<input
+							class="admin-input"
+							name="name"
+							type="text"
+							placeholder="e.g. Chicken Cheese Kottu (Full)"
+							[(ngModel)]="draft.name"
+							required
+						/>
+					</label>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Category *</span>
+							<select class="admin-input" name="category" [(ngModel)]="draft.category" required>
+								@for (cat of categoriesList; track cat) {
+									<option [value]="cat">{{ cat }}</option>
+								}
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Partner Shop *</span>
+							<select class="admin-input" name="shopName" [(ngModel)]="draft.shopName" required>
+								@for (shop of shopsList; track shop) {
+									<option [value]="shop">{{ shop }}</option>
+								}
+							</select>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Price (Rs.) *</span>
+							<input
+								class="admin-input"
+								name="price"
+								type="number"
+								min="10"
+								step="10"
+								[(ngModel)]="draft.price"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Original Price (optional)</span>
+							<input
+								class="admin-input"
+								name="originalPrice"
+								type="number"
+								min="10"
+								step="10"
+								[(ngModel)]="draft.originalPrice"
+							/>
+						</label>
+					</div>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Stock Status</span>
+							<select class="admin-input" name="stockStatus" [(ngModel)]="draft.stockStatus">
+								@for (stock of stockStatusOptions; track stock) {
+									<option [value]="stock">{{ stock }}</option>
+								}
+							</select>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Status</span>
+							<select class="admin-input" name="status" [(ngModel)]="draft.status">
+								<option value="Active">Active</option>
+								<option value="Inactive">Inactive</option>
+							</select>
+						</label>
+					</div>
+
+					<label class="form-field">
+						<span class="field-label">Description</span>
+						<textarea
+							class="admin-input modal-textarea"
+							name="description"
+							rows="2"
+							placeholder="Brief description of this menu item..."
+							[(ngModel)]="draft.description"
+						></textarea>
+					</label>
+
+					<footer class="modal-footer">
+						<button class="admin-button" type="button" (click)="closeModal()">Cancel</button>
+						<button class="admin-button admin-button--primary" type="submit">
+							{{ isCreateMode ? 'Create Product' : 'Save Changes' }}
+						</button>
+					</footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	<!-- Delete Confirmation Dialog -->
+	@if (productToDelete; as prod) {
+		<app-confirm-dialog
+			title="Delete product?"
+			[message]="'Are you sure you want to delete &quot;' + prod.name + '&quot; from partner shop &quot;' + prod.shopName + '&quot;?'"
+			confirmText="Delete product"
+			cancelText="Cancel"
+			iconClass="bi-trash3-fill"
+			confirmIconClass="bi-trash3"
+			tone="danger"
+			(confirmed)="confirmDelete()"
+			(cancelled)="productToDelete = null"
+		/>
+	}
+</section>
+

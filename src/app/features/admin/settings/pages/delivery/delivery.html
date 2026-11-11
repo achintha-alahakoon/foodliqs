@@ -1,0 +1,639 @@
+<section class="delivery-settings-page" aria-label="Delivery settings and configuration">
+	@if (toastMessage) {
+		<div class="feedback-banner" role="status" aria-live="polite">
+			<i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+			<span>{{ toastMessage }}</span>
+		</div>
+	}
+
+	<!-- Metric Cards Header -->
+	<div class="settings-metrics">
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Base Delivery Fee</span>
+				<strong class="metric-value">Rs. {{ config.baseFee | number }}</strong>
+				<small class="metric-sub">Covers first {{ config.baseDistanceKm }} km</small>
+			</div>
+			<div class="metric-icon is-gold" aria-hidden="true">
+				<i class="bi bi-bicycle"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Operating Radius</span>
+				<strong class="metric-value">{{ maxOperatingRadius }}.0 km</strong>
+				<small class="metric-sub">From Parakaduwa Hub</small>
+			</div>
+			<div class="metric-icon is-blue" aria-hidden="true">
+				<i class="bi bi-geo-alt"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Free Delivery Over</span>
+				<strong class="metric-value">Rs. {{ config.freeDeliveryThreshold | number }}</strong>
+				<small class="metric-sub">{{ config.enableFreeDelivery ? 'Active promotion' : 'Disabled' }}</small>
+			</div>
+			<div class="metric-icon is-green" aria-hidden="true">
+				<i class="bi bi-gift"></i>
+			</div>
+		</article>
+
+		<article class="metric-card admin-card">
+			<div class="metric-details">
+				<span class="metric-label">Active Coverage</span>
+				<strong class="metric-value">{{ activeZonesCount }} Zones</strong>
+				<small class="metric-sub">{{ activeTiersCount }} distance tiers active</small>
+			</div>
+			<div class="metric-icon is-orange" aria-hidden="true">
+				<i class="bi bi-sliders"></i>
+			</div>
+		</article>
+	</div>
+
+	<!-- Section Tabs & Global Actions -->
+	<div class="settings-controls-bar">
+		<div class="view-tabs" role="tablist" aria-label="Settings sections">
+			<button
+				type="button"
+				class="view-tab"
+				[class.is-active]="activeTab === 'pricing'"
+				role="tab"
+				[attr.aria-selected]="activeTab === 'pricing'"
+				(click)="setActiveTab('pricing')"
+			>
+				<i class="bi bi-cash-coin" aria-hidden="true"></i>
+				<span>Fees &amp; Pricing</span>
+			</button>
+
+			<button
+				type="button"
+				class="view-tab"
+				[class.is-active]="activeTab === 'tiers'"
+				role="tab"
+				[attr.aria-selected]="activeTab === 'tiers'"
+				(click)="setActiveTab('tiers')"
+			>
+				<i class="bi bi-map" aria-hidden="true"></i>
+				<span>Distance Tiers &amp; Zones</span>
+			</button>
+
+			<button
+				type="button"
+				class="view-tab"
+				[class.is-active]="activeTab === 'operations'"
+				role="tab"
+				[attr.aria-selected]="activeTab === 'operations'"
+				(click)="setActiveTab('operations')"
+			>
+				<i class="bi bi-clock-history" aria-hidden="true"></i>
+				<span>Operating Hours &amp; Surges</span>
+			</button>
+		</div>
+
+		<div class="action-bar">
+			<button type="button" class="admin-button" (click)="openResetConfirm()">
+				<i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+				<span>Reset Defaults</span>
+			</button>
+			<button type="button" class="admin-button admin-button--primary" (click)="saveAllSettings()">
+				<i class="bi bi-check2" aria-hidden="true"></i>
+				<span>Save Changes</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- TAB 1: Fees & Pricing Form -->
+	@if (activeTab === 'pricing') {
+		<div class="settings-card admin-card">
+			<header class="section-header">
+				<div>
+					<h2>Standard Pricing &amp; Order Value Rules</h2>
+					<p>Configure customer delivery charges, threshold limits, and packaging rates.</p>
+				</div>
+			</header>
+
+			<form class="settings-form" (ngSubmit)="saveAllSettings()">
+				<div class="form-grid">
+					<label class="form-field">
+						<span class="field-label">Base Delivery Fee (Rs.) *</span>
+						<input
+							class="admin-input"
+							name="baseFee"
+							type="number"
+							min="50"
+							step="10"
+							[(ngModel)]="config.baseFee"
+							required
+						/>
+						<small class="field-hint">Flat charge for the inner base delivery perimeter</small>
+					</label>
+
+					<label class="form-field">
+						<span class="field-label">Base Covered Distance (km) *</span>
+						<input
+							class="admin-input"
+							name="baseDistanceKm"
+							type="number"
+							min="1"
+							max="10"
+							step="0.5"
+							[(ngModel)]="config.baseDistanceKm"
+							required
+						/>
+						<small class="field-hint">Distance included before per-km surcharge applies</small>
+					</label>
+				</div>
+
+				<div class="form-grid">
+					<label class="form-field">
+						<span class="field-label">Rate Per Additional Km (Rs./km) *</span>
+						<input
+							class="admin-input"
+							name="perKmRate"
+							type="number"
+							min="10"
+							step="5"
+							[(ngModel)]="config.perKmRate"
+							required
+						/>
+						<small class="field-hint">Calculated dynamically beyond base distance</small>
+					</label>
+
+					<label class="form-field">
+						<span class="field-label">Minimum Order Requirement (Rs.) *</span>
+						<input
+							class="admin-input"
+							name="minOrderAmount"
+							type="number"
+							min="100"
+							step="50"
+							[(ngModel)]="config.minOrderAmount"
+							required
+						/>
+						<small class="field-hint">Lowest subtotal cart value required to place an order</small>
+					</label>
+				</div>
+
+				<div class="form-grid">
+					<label class="form-field">
+						<span class="field-label">Platform Packing &amp; Service Charge (Rs.)</span>
+						<input
+							class="admin-input"
+							name="servicePackingFee"
+							type="number"
+							min="0"
+							step="5"
+							[(ngModel)]="config.servicePackingFee"
+						/>
+						<small class="field-hint">Fixed fee added per order for packaging &amp; bags</small>
+					</label>
+
+					<div class="promo-box">
+						<div class="promo-header">
+							<div>
+								<strong>Free Delivery Threshold</strong>
+								<p>Waive delivery charges on large family orders.</p>
+							</div>
+							<label class="toggle-switch">
+								<input
+									type="checkbox"
+									name="enableFreeDelivery"
+									[(ngModel)]="config.enableFreeDelivery"
+								/>
+								<span class="slider"></span>
+							</label>
+						</div>
+
+						@if (config.enableFreeDelivery) {
+							<label class="form-field promo-field">
+								<span class="field-label">Qualifying Cart Subtotal (Rs.)</span>
+								<input
+									class="admin-input"
+									name="freeDeliveryThreshold"
+									type="number"
+									min="1000"
+									step="100"
+									[(ngModel)]="config.freeDeliveryThreshold"
+								/>
+							</label>
+						}
+					</div>
+				</div>
+			</form>
+		</div>
+	}
+
+	<!-- TAB 2: Distance Tiers & Hub Zones -->
+	@if (activeTab === 'tiers') {
+		<div class="tiers-zones-stack">
+			<!-- Distance Tiers Table -->
+			<div class="settings-card admin-card">
+				<header class="section-header">
+					<div>
+						<h2>Distance Tiers &amp; Estimated Times</h2>
+						<p>Categorize travel bands and delivery dispatch expectations.</p>
+					</div>
+				</header>
+
+				<div class="table-container">
+					<table class="settings-table">
+						<thead>
+							<tr>
+								<th scope="col">Tier Name</th>
+								<th scope="col">Distance Range</th>
+								<th scope="col">Fixed Fee</th>
+								<th scope="col">Estimated Time</th>
+								<th scope="col">Status</th>
+								<th scope="col" class="th-actions">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (tier of distanceTiers; track tier.id) {
+								<tr>
+									<td>
+										<strong class="tier-name">{{ tier.name }}</strong>
+									</td>
+									<td>
+										<span class="distance-pill">{{ tier.minDistance }} - {{ tier.maxDistance }} km</span>
+									</td>
+									<td>
+										<strong class="fee-text">Rs. {{ tier.deliveryFee | number }}</strong>
+									</td>
+									<td>
+										<span class="time-pill">
+											<i class="bi bi-clock" aria-hidden="true"></i>
+											{{ tier.estimatedTimeMin }} - {{ tier.estimatedTimeMax }} mins
+										</span>
+									</td>
+									<td>
+										<button
+											type="button"
+											class="status-toggle-btn"
+											[class.is-active]="tier.isActive"
+											(click)="toggleTierActive(tier)"
+										>
+											<span class="status-dot"></span>
+											<span>{{ tier.isActive ? 'Active' : 'Disabled' }}</span>
+										</button>
+									</td>
+									<td class="td-actions">
+										<button
+											type="button"
+											class="action-btn"
+											title="Edit tier rates"
+											(click)="openEditTier(tier)"
+										>
+											<i class="bi bi-pencil" aria-hidden="true"></i>
+										</button>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Delivery Hub Zones Table -->
+			<div class="settings-card admin-card">
+				<header class="section-header">
+					<div>
+						<h2>Regional Delivery Hub Zones</h2>
+						<p>Active dispatch areas around Parakaduwa and Avissawella.</p>
+					</div>
+				</header>
+
+				<div class="table-container">
+					<table class="settings-table">
+						<thead>
+							<tr>
+								<th scope="col">Zone Profile</th>
+								<th scope="col">Central Hub Landmark</th>
+								<th scope="col">Coverage Radius</th>
+								<th scope="col">Assigned Riders</th>
+								<th scope="col">Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (zone of deliveryZones; track zone.id) {
+								<tr>
+									<td>
+										<div class="zone-name-cell">
+											<strong class="zone-title">{{ zone.name }}</strong>
+											<code class="zone-id">{{ zone.id }}</code>
+										</div>
+									</td>
+									<td>
+										<span class="landmark-text">
+											<i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+											{{ zone.hubCenter }}
+										</span>
+									</td>
+									<td>
+										<span class="distance-pill">{{ zone.radiusKm }} km radius</span>
+									</td>
+									<td>
+										<span class="riders-pill">
+											<i class="bi bi-bicycle" aria-hidden="true"></i>
+											{{ zone.assignedRiders }} riders
+										</span>
+									</td>
+									<td>
+										<button
+											type="button"
+											class="status-toggle-btn"
+											[class.is-active]="zone.status === 'Active'"
+											(click)="toggleZoneStatus(zone)"
+										>
+											<span class="status-dot"></span>
+											<span>{{ zone.status }}</span>
+										</button>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	}
+
+	<!-- TAB 3: Operating Hours & Surges Form -->
+	@if (activeTab === 'operations') {
+		<div class="settings-card admin-card">
+			<header class="section-header">
+				<div>
+					<h2>Operating Schedule, Weather Surges &amp; COD Limits</h2>
+					<p>Set platform ordering hours, automated surcharges, and cash holding restrictions.</p>
+				</div>
+			</header>
+
+			<form class="settings-form" (ngSubmit)="saveAllSettings()">
+				<div class="form-grid">
+					<label class="form-field">
+						<span class="field-label">Hub Opening Time *</span>
+						<input
+							class="admin-input"
+							name="openingTime"
+							type="time"
+							[(ngModel)]="config.openingTime"
+							required
+						/>
+						<small class="field-hint">When customers can start placing breakfast &amp; morning orders</small>
+					</label>
+
+					<label class="form-field">
+						<span class="field-label">Hub Closing Time *</span>
+						<input
+							class="admin-input"
+							name="closingTime"
+							type="time"
+							[(ngModel)]="config.closingTime"
+							required
+						/>
+						<small class="field-hint">When daily food ordering closes</small>
+					</label>
+				</div>
+
+				<div class="surge-stack">
+					<!-- Rain Surge -->
+					<div class="surge-box" [class.is-enabled]="config.enableRainSurge">
+						<div class="surge-header">
+							<div class="surge-info">
+								<div class="surge-icon is-rain"><i class="bi bi-cloud-rain-fill"></i></div>
+								<div>
+									<strong>Rain &amp; Bad Weather Surcharge</strong>
+									<p>Applies additional incentive to riders during heavy tropical rain.</p>
+								</div>
+							</div>
+							<label class="toggle-switch">
+								<input
+									type="checkbox"
+									name="enableRainSurge"
+									[(ngModel)]="config.enableRainSurge"
+								/>
+								<span class="slider"></span>
+							</label>
+						</div>
+
+						@if (config.enableRainSurge) {
+							<div class="surge-input-row">
+								<label class="form-field">
+									<span class="field-label">Additional Rain Fee (Rs.)</span>
+									<input
+										class="admin-input"
+										name="rainSurgeFee"
+										type="number"
+										min="25"
+										step="25"
+										[(ngModel)]="config.rainSurgeFee"
+									/>
+								</label>
+							</div>
+						}
+					</div>
+
+					<!-- Late Night Surge -->
+					<div class="surge-box" [class.is-enabled]="config.enableLateNightSurge">
+						<div class="surge-header">
+							<div class="surge-info">
+								<div class="surge-icon is-night"><i class="bi bi-moon-stars-fill"></i></div>
+								<div>
+									<strong>Late Night Operating Surge</strong>
+									<p>Added automatically for orders placed after 10:00 PM.</p>
+								</div>
+							</div>
+							<label class="toggle-switch">
+								<input
+									type="checkbox"
+									name="enableLateNightSurge"
+									[(ngModel)]="config.enableLateNightSurge"
+								/>
+								<span class="slider"></span>
+							</label>
+						</div>
+
+						@if (config.enableLateNightSurge) {
+							<div class="surge-input-row">
+								<label class="form-field">
+									<span class="field-label">Late Night Fee (Rs.)</span>
+									<input
+										class="admin-input"
+										name="lateNightSurgeFee"
+										type="number"
+										min="25"
+										step="25"
+										[(ngModel)]="config.lateNightSurgeFee"
+									/>
+								</label>
+							</div>
+						}
+					</div>
+				</div>
+
+				<!-- COD Restrictions -->
+				<div class="form-grid">
+					<label class="form-field">
+						<span class="field-label">Maximum COD Order Ceiling (Rs.) *</span>
+						<input
+							class="admin-input"
+							name="maxCodOrderLimit"
+							type="number"
+							min="1000"
+							step="500"
+							[(ngModel)]="config.maxCodOrderLimit"
+							required
+						/>
+						<small class="field-hint">Orders exceeding this require online card payment</small>
+					</label>
+
+					<label class="form-field">
+						<span class="field-label">Rider Maximum Cash-in-Hand Cap (Rs.) *</span>
+						<input
+							class="admin-input"
+							name="maxRiderCodHolding"
+							type="number"
+							min="5000"
+							step="1000"
+							[(ngModel)]="config.maxRiderCodHolding"
+							required
+						/>
+						<small class="field-hint">Riders must settle cash at hub before taking further COD deliveries</small>
+					</label>
+				</div>
+			</form>
+		</div>
+	}
+
+	<!-- Edit Distance Tier Modal -->
+	@if (editingTier; as tier) {
+		<div class="modal-backdrop" (click)="closeEditTier()">
+			<section
+				class="tier-modal admin-card"
+				role="dialog"
+				aria-modal="true"
+				[attr.aria-labelledby]="'modal-tier-title'"
+				(click)="$event.stopPropagation()"
+			>
+				<header class="modal-header">
+					<h2 id="modal-tier-title">Edit Distance Tier ({{ tier.name }})</h2>
+					<button
+						type="button"
+						class="close-modal-btn"
+						aria-label="Close dialog"
+						(click)="closeEditTier()"
+					>
+						<i class="bi bi-x-lg" aria-hidden="true"></i>
+					</button>
+				</header>
+
+				<form (ngSubmit)="saveTierEdit()" class="modal-form">
+					<label class="form-field">
+						<span class="field-label">Tier Name *</span>
+						<input
+							class="admin-input"
+							name="tierName"
+							type="text"
+							[(ngModel)]="tier.name"
+							required
+						/>
+					</label>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Min Distance (km) *</span>
+							<input
+								class="admin-input"
+								name="minDistance"
+								type="number"
+								min="0"
+								step="0.5"
+								[(ngModel)]="tier.minDistance"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Max Distance (km) *</span>
+							<input
+								class="admin-input"
+								name="maxDistance"
+								type="number"
+								min="1"
+								step="0.5"
+								[(ngModel)]="tier.maxDistance"
+								required
+							/>
+						</label>
+					</div>
+
+					<label class="form-field">
+						<span class="field-label">Delivery Fee (Rs.) *</span>
+						<input
+							class="admin-input"
+							name="deliveryFee"
+							type="number"
+							min="50"
+							step="10"
+							[(ngModel)]="tier.deliveryFee"
+							required
+						/>
+					</label>
+
+					<div class="form-row">
+						<label class="form-field">
+							<span class="field-label">Min Time (mins) *</span>
+							<input
+								class="admin-input"
+								name="estimatedTimeMin"
+								type="number"
+								min="5"
+								step="5"
+								[(ngModel)]="tier.estimatedTimeMin"
+								required
+							/>
+						</label>
+
+						<label class="form-field">
+							<span class="field-label">Max Time (mins) *</span>
+							<input
+								class="admin-input"
+								name="estimatedTimeMax"
+								type="number"
+								min="10"
+								step="5"
+								[(ngModel)]="tier.estimatedTimeMax"
+								required
+							/>
+						</label>
+					</div>
+
+					<footer class="modal-footer">
+						<button class="admin-button" type="button" (click)="closeEditTier()">Cancel</button>
+						<button class="admin-button admin-button--primary" type="submit">
+							Save Tier
+						</button>
+					</footer>
+				</form>
+			</section>
+		</div>
+	}
+
+	<!-- Reset Confirm Dialog -->
+	@if (isResetConfirmOpen) {
+		<app-confirm-dialog
+			title="Reset Delivery Settings?"
+			message="Are you sure you want to revert all delivery fees, schedules, and thresholds to factory default values?"
+			confirmText="Reset to Defaults"
+			cancelText="Keep Current"
+			iconClass="bi-arrow-counterclockwise"
+			confirmIconClass="bi-arrow-counterclockwise"
+			tone="gold"
+			(confirmed)="confirmReset()"
+			(cancelled)="isResetConfirmOpen = false"
+		/>
+	}
+</section>
+
